@@ -132,12 +132,16 @@ if __name__ == "__main__":
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     EC_path = "D:\python\隐写鲁棒\MBRS\right\D_4_psnr_30.91484602877968.pth"
     D_path = "D:\python\隐写鲁棒\MBRS\right\EC_4.pth"
-    dataset = ImageProcessingDataset(input_root)
-    dataset.load_model(EC_path, D_path)
-
-
-
     network = Network(H, W, message_length, noise_layers, device, batch_size, lr, with_diffusion, only_decoder)
+    network.load_model(EC_path, D_path)
+
+    encoder = network.encoder_decoder
+    encoder.eval()
+
+
+
+
+
     
 
 
@@ -149,4 +153,4 @@ if __name__ == "__main__":
         num_workers=num_workers,
     )
 
-    batch_process(network, dataloader, output_root, device)
+    batch_process(encoder, dataloader, output_root, device)
