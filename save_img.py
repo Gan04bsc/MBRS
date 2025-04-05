@@ -14,6 +14,15 @@ from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
 from model.network_scunet import SCUNet
 from model.network_MBRS import Network
+from .settings import *
+from torch.utils.data import DataLoader
+from utils import *
+from network.Network import *
+
+from utils.load_train_setting import *
+settings = JsonConfig()
+settings.load_json_file("train_settings.json")
+noise_layers = settings.noise_layers
 
 
 
@@ -40,9 +49,7 @@ class ImageProcessingDataset(Dataset):
                     self.image_paths.append(os.path.join(root, f))
                     self.rel_dirs.append(rel_dir)
 
-    def load_model(self, path_encoder_decoder: str, path_discriminator: str):
-        self.load_model_ed(path_encoder_decoder)
-        self.load_model_dis(path_discriminator)
+
 
     def __len__(self):
         return len(self.image_paths)
@@ -67,6 +74,11 @@ class ImageProcessingDataset(Dataset):
         except Exception as e:
             print(f"Error loading {img_path}: {str(e)}")
             return None, idx
+        
+
+    def load_model(self, path_encoder_decoder: str, path_discriminator: str):
+        self.load_model_ed(path_encoder_decoder)
+        self.load_model_dis(path_discriminator)
 
 def batch_process(model, dataloader, output_root, device):
 
@@ -108,13 +120,26 @@ if __name__ == "__main__":
     output_root = "/data/experiment/model/HiDDeN/Hidden_35_gtos/train"
     batch_size = 32
     num_workers = 4
+    H = 128
+    W = 128
+    message_length = 30
+    noise_layers = 4
+    lr = 0.0001
+    with_diffusion = True
+    only_decoder = False
+
 
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-    
-    network = Network()
     EC_path = "D:\python\隐写鲁棒\MBRS\right\D_4_psnr_30.91484602877968.pth"
     D_path = "D:\python\隐写鲁棒\MBRS\right\EC_4.pth"
-    network.load_model(EC_path, D_path)
+    dataset = ImageProcessingDataset(input_root)
+    dataset.load_model(EC_path, D_path)
+
+
+
+    network = Network(H, W, message_length, noise_layers, device, batch_size, lr, with_diffusion, only_decoder)
+    
+
 
 
     dataset = ImageProcessingDataset(input_root)
