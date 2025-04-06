@@ -8,24 +8,22 @@ from torch import nn
 import numpy as np
 from thop import profile
 from PIL import Image
-import shutil
 from torchvision import transforms
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
-from model.network_scunet import SCUNet
-from model.network_MBRS import Network
-from .settings import *
+
+from utils.settings import *
 from torch.utils.data import DataLoader
 from utils import *
 from network.Network import *
-
+from network.Encoder_MP_Decoder import *
 from utils.load_train_setting import *
 settings = JsonConfig()
 settings.load_json_file("train_settings.json")
-noise_layers = settings.noise_layers
 
 
-
+import sys
+sys.path.append(r"D:\python\隐写鲁棒\MBRS")
 
 
 
@@ -123,15 +121,15 @@ if __name__ == "__main__":
     H = 128
     W = 128
     message_length = 30
-    noise_layers = 4
+    noise_layers = settings.noise_layers
     lr = 0.0001
     with_diffusion = True
     only_decoder = False
 
 
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-    EC_path = "D:\python\隐写鲁棒\MBRS\right\D_4_psnr_30.91484602877968.pth"
-    D_path = "D:\python\隐写鲁棒\MBRS\right\EC_4.pth"
+    EC_path = r"D:\python\隐写鲁棒\MBRS\right\D_4_psnr_30.91484602877968.pth"
+    D_path = r"D:\python\隐写鲁棒\MBRS\right\EC_4.pth"
     network = Network(H, W, message_length, noise_layers, device, batch_size, lr, with_diffusion, only_decoder)
     network.load_model(EC_path, D_path)
 
